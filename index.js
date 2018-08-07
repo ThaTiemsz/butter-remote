@@ -1,7 +1,7 @@
 const request = require("request-promise-native")
 
 class ButterRemote {
-    constructor() {
+    constructor(options) {
         this.isConnected = true
         this.options = {
             username: "popcorn",
@@ -10,6 +10,7 @@ class ButterRemote {
             port: "8008",
             debug: false
         }
+        this.init(options)
     }
 
     init(options) {
@@ -23,7 +24,7 @@ class ButterRemote {
                 method: "POST",
                 uri: `http://${this.options.ip}:${this.options.port}`,
                 headers: {
-                    "Authorization": "",
+                    "Authorization": Buffer.from(`${this.options.username}:${this.options.password}`).toString("base64"),
                     "Accept": "application/json"
                 },
                 body: {
@@ -38,7 +39,7 @@ class ButterRemote {
             })
 
             if (res.statusCode === 200) {
-                const data = res.body
+                const data = res.body.result ? res.body.result : res.body
                 this.handleData(data, method)
                 return resolve(data)
             } else {
