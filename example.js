@@ -9,3 +9,8 @@ async function list() {
     return console.log(list[0].title)
 }
 list()
+
+async function playing() {
+    console.log(await br.getPlaying())
+}
+playing()

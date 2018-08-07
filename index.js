@@ -20,32 +20,38 @@ class ButterRemote {
 
     call(method, params) {
         return new Promise(async(resolve, reject) => {
-            const res = await request({
-                method: "POST",
-                uri: `http://${this.options.ip}:${this.options.port}`,
-                headers: {
-                    "Authorization": Buffer.from(`${this.options.username}:${this.options.password}`).toString("base64"),
-                    "Accept": "application/json"
-                },
-                body: {
-                    id: Math.floor((Math.random()*100)+1),
-                    jsonrpc: "2.0",
-                    method,
-                    params: params ? params : []
-                },
-                timeout: 3000,
-                json: true,
-                resolveWithFullResponse: true
-            })
+            try {
+                const res = await request({
+                    method: "POST",
+                    uri: `http://${this.options.ip}:${this.options.port}`,
+                    headers: {
+                        "Authorization": Buffer.from(`${this.options.username}:${this.options.password}`).toString("base64"),
+                        "Accept": "application/json"
+                    },
+                    body: {
+                        id: Math.floor((Math.random()*100)+1),
+                        jsonrpc: "2.0",
+                        method,
+                        params: params ? params : []
+                    },
+                    timeout: 3000,
+                    json: true,
+                    resolveWithFullResponse: true
+                })
 
-            if (res.statusCode === 200) {
-                const data = res.body.result ? res.body.result : res.body
-                this.handleData(data, method)
-                return resolve(data)
-            } else {
+                if (res.statusCode === 200) {
+                    const data = res.body.result ? res.body.result : res.body
+                    this.handleData(data, method)
+                    return resolve(data)
+                } else {
+                    this.log("Connection timed out: cannot reach Butter.")
+                    this.isConnected = false
+                    return reject()
+                }
+            } catch (err) {
                 this.log("Connection timed out: cannot reach Butter.")
                 this.isConnected = false
-                return reject()
+                return reject(err)
             }
         })
     }
